@@ -1,0 +1,44 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>resources/icon/album.png</file>
+        <file>resources/icon/backgroun6.jpg</file>
+        <file>resources/icon/background.png</file>
+        <file>resources/icon/background2.jpg</file>
+        <file>resources/icon/background3.jpg</file>
+        <file>resources/icon/background4.jpg</file>
+        <file>resources/icon/background5.jpg</file>
+        <file>resources/icon/close.png</file>
+        <file>resources/icon/cycle.png</file>
+        <file>resources/icon/delete.png</file>
+        <file>resources/icon/favouriteMusic.png</file>
+        <file>resources/icon/likeBlack.png</file>
+        <file>resources/icon/likeRed.png</file>
+        <file>resources/icon/logo.ico</file>
+        <file>resources/icon/logo.png</file>
+        <file>resources/icon/max.png</file>
+        <file>resources/icon/min.png</file>
+        <file>resources/icon/modeCycle.png</file>
+        <file>resources/icon/modeSequence.png</file>
+        <file>resources/icon/modeShuffle.png</file>
+        <file>resources/icon/music.png</file>
+        <file>resources/icon/music1.png</file>
+        <file>resources/icon/next.png</file>
+        <file>resources/icon/normal.png</file>
+        <file>resources/icon/pause.png</file>
+        <file>resources/icon/playHistory.png</file>
+        <file>resources/icon/previous.png</file>
+        <file>resources/icon/recommend.png</file>
+        <file>resources/icon/search.png</file>
+        <file>resources/icon/setting.png</file>
+        <file>resources/icon/silence.png</file>
+        <file>resources/icon/skin.png</file>
+        <file>resources/icon/song.png</file>
+        <file>resources/icon/start.png</file>
+        <file>resources/icon/volume.png</file>
+        <file>resources/icon/playing.png</file>
+        <file>resources/icon/local.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>resources/commandSql.sql</file>
+    </qresource>
+</RCC>
