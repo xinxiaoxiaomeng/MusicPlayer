@@ -29,8 +29,9 @@ const QString StringConstants::UI::volumePath = QString(":/image/resources/icon/
 const QString StringConstants::UI::likeBlackPath = QString(":/image/resources/icon/likeBlack.png");
 const QString StringConstants::UI::likeRedPath = QString(":/image/resources/icon/likeRed.png");
 const QString StringConstants::UI::modeSequencePath = QString(":/image/resources/icon/modeSequence.png");
-const QString StringConstants::UI::modeCyclePath = QString(":/image/resources/icon/modeCycle.png");
+const QString StringConstants::UI::modeLoopPath = QString(":/image/resources/icon/modeLoop.png");
 const QString StringConstants::UI::modeShufflePath = QString(":/image/resources/icon/modeShuffle.png");
+const QString StringConstants::UI::modeSignleLoopPath = QString(":/image/resources/icon/modeSignleLoop.png");
 
 const QString StringConstants::Settings::musicDownloadPath = QString("D:/MusicDownload/");
 const QString StringConstants::Settings::databasePath = QString("./musicdatabase.db");

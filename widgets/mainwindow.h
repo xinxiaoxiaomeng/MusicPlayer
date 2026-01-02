@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() = default;
 
 private:
     QWidget *centralWidget = nullptr;
@@ -88,7 +88,7 @@ private:
     QLabel *musicLogo = nullptr;
     QLabel *playingName = nullptr;
     QLabel *lyricText = nullptr;
-    QLabel *likeInfo = nullptr;
+    QLabel *infoText = nullptr;
 
     QMenu *rightClickedMenu = nullptr;
 
@@ -129,25 +129,28 @@ private:
     void setupRightClickedMenu();
 
 
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+    void showEvent(QShowEvent *event) override;
 
     bool isPointInWidget(QWidget *widget, const QPoint &pos);
     void startDragging(const QPointF &globalPos);
     void updateDragging(const QPointF &globalPos);
     void stopDragging();
 
-    void showEvent(QShowEvent *event) override;
+
 
     void centerWindow();
     void setupConnections();
     void playNewTrack(MusicTrack *track);
     void playRandomMusic();
-    bool eventFilter(QObject *obj, QEvent *event) override;
+    void infoShow(QString text);
+
 
 
 

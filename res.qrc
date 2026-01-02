@@ -17,7 +17,6 @@
         <file>resources/icon/logo.png</file>
         <file>resources/icon/max.png</file>
         <file>resources/icon/min.png</file>
-        <file>resources/icon/modeCycle.png</file>
         <file>resources/icon/modeSequence.png</file>
         <file>resources/icon/modeShuffle.png</file>
         <file>resources/icon/music.png</file>
@@ -37,6 +36,8 @@
         <file>resources/icon/volume.png</file>
         <file>resources/icon/playing.png</file>
         <file>resources/icon/local.png</file>
+        <file>resources/icon/modeLoop.png</file>
+        <file>resources/icon/modeSignleLoop.png</file>
     </qresource>
     <qresource prefix="/">
         <file>resources/commandSql.sql</file>

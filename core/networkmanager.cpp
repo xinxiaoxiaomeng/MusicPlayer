@@ -19,21 +19,6 @@ NetworkManager::~NetworkManager()
 
 }
 
-//void NetworkManager::downloadMusic(MusicTrack *track)
-//{
-//    networkCommand = NetworkCommand::Download;
-
-//    saveFile.setFileName(QString("D:/MusicDownload/%1-%2.mp3").arg(track->artist).arg(track->title));
-
-//    qDebug() << saveFile.fileName();
-
-//    if (!saveFile.open(QIODevice::WriteOnly)) {
-//        return;
-//    }
-
-//    networkAccess(track->downloadPath);
-//}
-
 void NetworkManager::downloadMusic(const QUrl &url)
 {
     QNetworkRequest request(url);
@@ -49,9 +34,8 @@ void NetworkManager::downloadMusic(const QUrl &url)
 
     connect(reply, &QNetworkReply::finished, this, [this, reply]() {
 
-        // 处理重定向（正确时机）
-        QVariant redirect =
-            reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+        // 处理重定向
+        QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
 
         if (redirect.isValid()) {
             QUrl newUrl = reply->url().resolved(redirect.toUrl());

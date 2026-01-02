@@ -281,7 +281,7 @@ void MusicListController::updateSearchList(QList<MusicTrack> *resultList)
         sqlManager->execuateSql(sql);
     }
 
-    updateList(SearchListType);
+//    updateList(SearchListType);
 }
 
 

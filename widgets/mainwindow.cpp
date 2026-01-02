@@ -92,13 +92,16 @@ void MainWindow::handleReturnedList(QList<MusicTrack>* returnList)
     if (returnList && returnList->size()>0)
     {
         if (networkCommand == Search)
+        {
             musicListController->updateSearchList(returnList);
+            emit iconSearchResult->clicked(true);
+            emit buttonGroup->idClicked(StringConstants::UI::LeftBar::SearchResult);
+        }
         else if (networkCommand == Play)
         {
             playingInfo->playingTrack.filePath = returnList->at(0).filePath;
             musicListController->saveUrl(&playingInfo->playingTrack);
             emit playingTrackChanged(&playingInfo->playingTrack);
-            //musicListController->addTrackToList(PlayHistoryListType, &playingInfo->playingTrack);
         }
         else if (networkCommand == Download)
         {
@@ -120,9 +123,11 @@ void MainWindow::handleReturnedList(QList<MusicTrack>* returnList)
             networkManager->downloadMusic(selectedTrack.downloadPath);
             if (QFileInfo(savePath).size() > 0)
             {
-                qDebug() << "下载成功";
+                infoShow("下载成功");
+                musicListController->updateLocalList(&selectedTrack);
+//                qDebug() << "下载成功";
             }
-            musicListController->updateLocalList(&selectedTrack);
+
         }
         networkCommand = Empty;
     }
@@ -187,37 +192,21 @@ void MainWindow::iconLikeClicked()
     if (playingInfo->playingTrack.title.isEmpty())
         return;
 
-    likeInfo->raise();
-    // 使用单次定时器在窗口显示后定位
-    QPoint center = bodyWidget->rect().center();
-
-
-//    QTimer::singleShot(0, this, [this]() {
-//        if (likeInfo && bodyWidget) {
-//            QPoint center = bodyWidget->rect().center();
-//            likeInfo->move(center - QPoint(likeInfo->width()/2, likeInfo->height()/2));
-//        }
-//    });
-
     if(playingInfo->playingTrack.like == true)
     {
         isLike = false;
         playingInfo->playingTrack.like = false;
         iconLike->setIcon(QIcon(StringConstants::UI::likeBlackPath));
-        likeInfo->setText("取消喜欢");
+        infoShow("取消喜欢");
     }
     else
     {
         isLike = true;
         playingInfo->playingTrack.like = true;
         iconLike->setIcon(QIcon(StringConstants::UI::likeRedPath));
-        likeInfo->setText("已添加到我喜欢");
+        infoShow("已添加到我喜欢");
     }
-    likeInfo->setVisible(true);
-    likeInfo->move(center - QPoint(likeInfo->width()/2, likeInfo->height()/2));
-    QTimer::singleShot(2000, this, [this]() {
-        if (likeInfo) likeInfo->setVisible(false);
-    });
+
     musicListController->addTrackToList(LikeListType, &playingInfo->playingTrack);
 }
 
@@ -236,14 +225,19 @@ void MainWindow::iconPlayModeClicked()
     if (playMode == PlayMode::Sequential)
     {
         playMode = PlayMode::Loop;
-        iconPlayMode->setIcon(QIcon(StringConstants::UI::modeCyclePath));
+        iconPlayMode->setIcon(QIcon(StringConstants::UI::modeLoopPath));
     }
     else if(playMode == PlayMode::Loop)
     {
         playMode = PlayMode::Random;
         iconPlayMode->setIcon(QIcon(StringConstants::UI::modeShufflePath));
     }
-    else
+    else if (playMode == PlayMode::Random)
+    {
+        playMode = PlayMode::SignleLoop;
+        iconPlayMode->setIcon(QIcon(StringConstants::UI::modeSignleLoopPath));
+    }
+    else if (playMode == PlayMode::SignleLoop)
     {
         playMode = PlayMode::Sequential;
         iconPlayMode->setIcon(QIcon(StringConstants::UI::modeSequencePath));
@@ -343,6 +337,19 @@ void MainWindow::iconButtonGroupClicked(int id)
         btn->style()->polish(btn);      // 重新应用样式表到按钮上，根据按钮当前的属性来计算新的样式
         btn->update();                  // 会触发按钮的重绘事件，确保按钮的外观被更新以反映新的样式。
     }
+}
+
+void MainWindow::infoShow(QString text)
+{
+    infoText->setText(text);
+    infoText->raise();
+    // 使用单次定时器在窗口显示后定位
+    QPoint center = bodyWidget->rect().center();
+    infoText->setVisible(true);
+    infoText->move(center - QPoint(infoText->width()/2, infoText->height()/2));
+    QTimer::singleShot(2000, this, [this]() {
+        if (infoText) infoText->setVisible(false);
+    });
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
@@ -485,15 +492,15 @@ void MainWindow::setupBodyWidget()
 //    bodyLayout->setContentsMargins(0, 0, 20, 0);  // lrtb
 //    bodyLayout->setSpacing(0);  -- 用法需要整理笔记
 
-    likeInfo = new QLabel(bodyWidget);
+    infoText = new QLabel(bodyWidget);
 //    likeInfo->move(bodyWidget->geometry().center() - QPoint(likeInfo->width()/2, likeInfo->height()/2));
-    likeInfo->setText("已添加到我喜欢");
-    likeInfo->setAlignment(Qt::AlignCenter);
+    infoText->setText("已添加到我喜欢");
+    infoText->setAlignment(Qt::AlignCenter);
     // 设置 likeInfo 为浮动窗口样式
-    likeInfo->setAttribute(Qt::WA_TransparentForMouseEvents);  // 鼠标穿透
+    infoText->setAttribute(Qt::WA_TransparentForMouseEvents);  // 鼠标穿透
 //    likeInfo->raise();  // 置顶显示
     // 设置 likeInfo 样式
-    likeInfo->setStyleSheet(R"(
+    infoText->setStyleSheet(R"(
         QLabel {
             background-color: rgba(45, 45, 45, 100);
             color: white;
@@ -502,8 +509,8 @@ void MainWindow::setupBodyWidget()
             font-size: 14px;
         }
     )");
-    likeInfo->adjustSize();
-    likeInfo->setVisible(false);
+    infoText->adjustSize();
+    infoText->setVisible(false);
 
     bodyLayout->addWidget(musicListController->view(), 1);
     bodyLayout->addItem(spacer);
@@ -1132,10 +1139,6 @@ void MainWindow::updatePlayingTrackInfo()
     }
 
     playingName->setText(playingInfo->playingTrack.title);
-}
-
-MainWindow::~MainWindow()
-{
 }
 
 

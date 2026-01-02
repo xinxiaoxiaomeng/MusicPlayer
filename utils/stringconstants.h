@@ -41,8 +41,16 @@ public:
         static const QString likeBlackPath;
         static const QString likeRedPath;
         static const QString modeSequencePath;
-        static const QString modeCyclePath;
+        static const QString modeLoopPath;
         static const QString modeShufflePath;
+        static const QString modeSignleLoopPath;
+
+       enum LeftBar{
+            FavouriteMusic = 1,
+            PlayHistory,
+            LoaclMusic,
+            SearchResult
+        };
     };
 
     class Settings
