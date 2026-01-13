@@ -110,9 +110,11 @@ void NetworkManager::setSavePath(QString path)
     }
 }
 
+// 搜索歌词
 void NetworkManager::searchLyric(MusicTrack *track)
 {
-    QString url = kugouLyricApi + QString("version=9108&highlight=1&keyword=%1&plat=0&pagesize=20&area_code=1&page=1&with_res_tag=1").arg(track->title+track->artist);
+    QString url = kugouLyricApi + QString("&hash='%1'").arg(track->hash);
+    networkAccess(url);
 }
 
 void NetworkManager::searchMusic(QString searchInfo)

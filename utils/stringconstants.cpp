@@ -34,4 +34,4 @@ const QString StringConstants::UI::modeShufflePath = QString(":/image/resources/
 const QString StringConstants::UI::modeSignleLoopPath = QString(":/image/resources/icon/modeSignleLoop.png");
 
 const QString StringConstants::Settings::musicDownloadPath = QString("D:/MusicDownload/");
-const QString StringConstants::Settings::databasePath = QString("./musicdatabase.db");
+const QString StringConstants::Settings::databasePath = QString("../MusicPlayer/musicdatabase.db");

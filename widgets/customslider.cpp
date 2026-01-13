@@ -123,7 +123,7 @@ qint64 CustomSlider::timeStringToMs(const QString &timeStr) {
         return 0;
     }
 
-    //qDebug() << totalMs;
+    qDebug() << totalMs;
     return totalMs;
 }
 
@@ -131,7 +131,7 @@ qint64 CustomSlider::timeStringToMs(const QString &timeStr) {
 void CustomSlider::updateDuration(qint64 duration)
 {
     //setMaximum(timeStringToMs(duration));
-//    qDebug() << duration;
+    qDebug() << duration;
     setMaximum(duration);
 }
 

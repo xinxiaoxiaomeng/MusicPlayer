@@ -29,7 +29,8 @@ private:
 //    QString kugouDownloadApi = "https://wwwapi.kugou.com/play/songinfo";
     QString kugouDownloadApi = "http://trackercdn.kugou.com/i/?cmd=4";
     QString kugouPlayInfoApi = "http://m.kugou.com/app/i/getSongInfo.php?cmd=playInfo";
-    QString kugouLyricApi = "https://mobileservice.kugou.com/api/v3/lyric/search?";
+//    QString kugouLyricApi = "https://mobileservice.kugou.com/api/v3/lyric/search?";
+    QString kugouLyricApi = "http://m.kugou.com/app/i/krc.php?cmd=100&timelength=1";
 
     QNetworkRequest *networkRequest = nullptr;
     QNetworkAccessManager *networkAccessManager = nullptr;

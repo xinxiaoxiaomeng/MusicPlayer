@@ -124,9 +124,10 @@ void MainWindow::handleReturnedList(QList<MusicTrack>* returnList)
             if (QFileInfo(savePath).size() > 0)
             {
                 infoShow("下载成功");
-                musicListController->updateLocalList(&selectedTrack);
+
 //                qDebug() << "下载成功";
             }
+            musicListController->updateLocalList(&selectedTrack);
 
         }
         networkCommand = Empty;

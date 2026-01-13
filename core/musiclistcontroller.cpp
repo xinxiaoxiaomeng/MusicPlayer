@@ -1,4 +1,6 @@
 #include "musiclistcontroller.h"
+#include <QFile>
+#include <QFileInfo>
 
 MusicListController::MusicListController(QObject *parent)
     : QObject(parent)
@@ -158,6 +160,22 @@ void MusicListController::loadLikeList()
 void MusicListController::loadLocalList()
 {
     localList = sqlManager->getMusicListBySql(sqlManager->sqls["get_localList"]);
+
+    int length = localList->size();
+    // 判断对应的路径下是否存在播放文件
+    MusicTrack track;
+    for (int i = 0; i < length; i++)
+    {
+        track = localList->at(i);
+
+        QFileInfo file(track.filePath);
+
+        if (!file.exists())
+        {
+            sqlManager->execuateSql(sqlManager->sqls["deleteTrack_localList"].arg(track.title).arg(track.artist));
+        }
+    }
+
     updateRows(localList);
 }
 
@@ -257,6 +275,7 @@ void MusicListController::updateList(TypeList type)
 
 void MusicListController::updateLocalList(MusicTrack *track)
 {
+    qDebug() << "更新下载文件";
     QString sql = QString(sqlManager->sqls["update_localList"]).arg(track->title).arg(track->artist).arg(track->album).arg(track->album_id).arg(track->hash).arg(track->filePath).arg(track->downloadPath);
     sqlManager->execuateSql(sql);
 }
