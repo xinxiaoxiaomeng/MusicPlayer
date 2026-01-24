@@ -1,14 +1,9 @@
 #include "playbackcontroller.h"
 #include <QDebug>
 
-PlaybackController::PlaybackController(QObject *parent):
-    QObject(parent),
-    audioEngine(new AudioEngine(this)),
-    playMode(Sequential),
-    playbackState(Stopped),
-    currentIndex(-1)
+PlaybackController::PlaybackController(QObject *parent): QObject(parent)
 {
-    setupConnections();
+
 }
 
 PlaybackController::~PlaybackController()
@@ -24,6 +19,16 @@ MusicTrack PlaybackController::currentTrack() const
 PlayMode PlaybackController::currentMode() const
 {
     return playMode;
+}
+
+void PlaybackController::initialized()
+{
+    audioEngine = new AudioEngine(this);
+    playMode = Sequential;
+    playbackState = Stopped;
+    currentIndex = -1;
+
+    setupConnections();
 }
 
 void PlaybackController::next()
@@ -51,11 +56,11 @@ void PlaybackController::updatePlayMode(PlayMode playMode)
     Q_UNUSED(playMode)
 }
 
-void PlaybackController::playTrack(MusicTrack *track)
+void PlaybackController::playTrack(MusicTrack track)
 {
-    qDebug() << track->filePath;
+    qDebug() << track.filePath;
     audioEngine->stop();
-    playingTrack = track;
+    playingTrack = &track;
     audioEngine->setTrack(playingTrack);
     audioEngine->play();
 }
@@ -82,6 +87,10 @@ void PlaybackController::setupConnections()
     connect(audioEngine->mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, [=](QMediaPlayer::MediaStatus status){
         emit statusChanged(status);
      });
+
+    connect(audioEngine, &AudioEngine::showWarningMessage, this, [=](QString title, QString text){
+        emit requestWarningMessage(title, text);
+    });
 }
 
 void PlaybackController::setPlayMode(PlayMode mode)

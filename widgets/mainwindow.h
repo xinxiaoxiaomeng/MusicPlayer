@@ -23,6 +23,7 @@
 #include "sqlmanager.h"
 #include "networkmanager.h"
 #include <QMenu>
+#include <QThread>
 #include "volumepopup.h"
 
 
@@ -190,6 +191,14 @@ signals:
     void likeStatusChanges(MusicTrack &track);
     void lyricShow(QString);
     void playingTrackChanged(MusicTrack *track);
+    void requestPlayTrack(MusicTrack track);
+    void requestPause();
+    void requestPlay();
+    void reqestSetVolume(float value);
+    void requestDownloadInfo(MusicTrack track);
+    void requestDownloadMusic(QString savePath, QString downloadPath);
+    void requestSearchMusic(QString keyWord);
+    void requestPlayMusicInfo(MusicTrack track);
 //    void likeChanged(TypeList type, MusicTrack *track);
 //    void listTypeChanged(MusicListController::typeList);
 

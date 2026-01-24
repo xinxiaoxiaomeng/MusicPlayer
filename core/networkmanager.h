@@ -52,11 +52,12 @@ private:
 
 
 public slots:
+    void initialized();
     void searchReplyFinished(QNetworkReply *reply);
     void searchMusic(QString searchInfo);
-    void searchLyric(MusicTrack *track);
-    void playMusicInfo(MusicTrack *track);
-    void downloadMusicInfo(MusicTrack *track);
+    void searchLyric(MusicTrack track);
+    void playMusicInfo(MusicTrack track);
+    void downloadMusicInfo(MusicTrack track);
     void downloadMusic(const QUrl &url);
 
 signals:

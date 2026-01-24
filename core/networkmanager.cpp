@@ -3,15 +3,9 @@
 #include <QDir>
 #include "stringconstants.h"
 
-NetworkManager::NetworkManager(QObject *parent)
-    : QObject(parent)
-    , networkRequest(new QNetworkRequest())
-    , networkAccessManager(new QNetworkAccessManager())
-    , resultList(new QList<MusicTrack>())
-    , jsonManager(new JsonManager())
-    , md5Helper(new MD5Helper())
+NetworkManager::NetworkManager(QObject *parent): QObject(parent)
 {
-    setupConnections();
+
 }
 
 NetworkManager::~NetworkManager()
@@ -58,20 +52,31 @@ void NetworkManager::downloadMusic(const QUrl &url)
 
 
 
-void NetworkManager::downloadMusicInfo(MusicTrack *track)
+void NetworkManager::downloadMusicInfo(MusicTrack track)
 {
-    QString key = track->hash + "kgcloud";
+    QString key = track.hash + "kgcloud";
     key = md5Helper->encryptString(key);
-    QString url = kugouDownloadApi + QString("&hash=%1&key=%2&pid=1&forceDown=0&vip=1").arg(track->hash).arg(key);
+    QString url = kugouDownloadApi + QString("&hash=%1&key=%2&pid=1&forceDown=0&vip=1").arg(track.hash).arg(key);
 
     networkAccess(url);
 }
 
-void NetworkManager::playMusicInfo(MusicTrack *track)
+void NetworkManager::initialized()
+{
+    networkRequest = new QNetworkRequest();
+    networkAccessManager = new QNetworkAccessManager();
+    resultList = new QList<MusicTrack>();
+    jsonManager = new JsonManager();
+    md5Helper = new MD5Helper();
+
+    setupConnections();
+}
+
+void NetworkManager::playMusicInfo(MusicTrack track)
 {
     networkCommand = NetworkCommand::Play;
     // 返回的url
-    QString url = kugouPlayInfoApi + QString("&hash=%1&album=%2").arg(track->hash).arg(track->album_id);
+    QString url = kugouPlayInfoApi + QString("&hash=%1&album=%2").arg(track.hash).arg(track.album_id);
     networkAccess(url);
 
 }
@@ -111,9 +116,9 @@ void NetworkManager::setSavePath(QString path)
 }
 
 // 搜索歌词
-void NetworkManager::searchLyric(MusicTrack *track)
+void NetworkManager::searchLyric(MusicTrack track)
 {
-    QString url = kugouLyricApi + QString("&hash='%1'").arg(track->hash);
+    QString url = kugouLyricApi + QString("&hash='%1'").arg(track.hash);
     networkAccess(url);
 }
 

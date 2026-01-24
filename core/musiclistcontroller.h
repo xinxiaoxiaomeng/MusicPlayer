@@ -11,8 +11,9 @@ class MusicListController: public QObject
     Q_OBJECT
 
 public:
+    MusicListController() = default;
     MusicListController(QObject *parent);
-    ~MusicListController();
+    ~MusicListController() = default;
 
 
 

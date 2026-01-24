@@ -18,11 +18,6 @@ MusicListController::MusicListController(QObject *parent)
     setupConnections();
 }
 
-MusicListController::~MusicListController()
-{
-
-}
-
 void MusicListController::addTrack(MusicTrack &track)
 {
     musicListModel->addTrack(track);

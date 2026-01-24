@@ -1,6 +1,7 @@
 #include "audioengine.h"
 #include <QDebug>
 #include <QMessageBox>
+#include <QMetaObject>
 
 AudioEngine::AudioEngine(QObject *parent):
     QObject(parent),
@@ -45,11 +46,9 @@ void AudioEngine::play()
     {
        if (!currentTrack || currentTrack->filePath.isEmpty())
        {
-           qDebug() << "2025/12/29 test";
-           QMessageBox::warning(0, "警告", "未找到播放文件!");
+           emit showWarningMessage("警告", "未找到播放文件!");
            mediaPlayer->setPosition(0);
            emit positionChanged(0);
-           //emit errorOccurred("曲目文件路径为空");
            return;
        }
 

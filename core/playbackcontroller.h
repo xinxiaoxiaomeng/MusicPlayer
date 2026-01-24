@@ -24,7 +24,7 @@ public:
     void stop();
     void next();
     void previous();
-    void playTrack(MusicTrack *track);
+    void playTrack(MusicTrack track);
     void setVolume(float value);
 
     MusicTrack currentTrack() const;
@@ -42,14 +42,18 @@ private:
     MusicTrack *playingTrack = nullptr;
     QList<MusicTrack> playList;
 
+
+
 public slots:
     void updatePlayMode(PlayMode playMode);
+    void initialized();
 
 signals:
     void sliderPositionChanged(qint64 position);
     void musicPlaybackStateChanged(QMediaPlayer::PlaybackState newState);
     void musicPlayDurationChanged(qint64 duration);
     void statusChanged(QMediaPlayer::MediaStatus status);
+    void requestWarningMessage(QString title, QString text);
 };
 
 #endif // PLAYBACKCONTROLLER_H

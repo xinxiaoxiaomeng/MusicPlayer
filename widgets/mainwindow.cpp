@@ -11,7 +11,7 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , musicListController(new MusicListController(this))
-    , playbackController(new PlaybackController(this))
+    , playbackController(new PlaybackController())  // 不能有父对象
     , lyricParser(new LyricParser(this))
     , networkManager(new NetworkManager())
     , playingInfo(new PlayingInfo())   
@@ -21,8 +21,34 @@ MainWindow::MainWindow(QWidget *parent)
     setupConnections();
     emit iconFavouriteMusic->clicked();
     emit buttonGroup->idClicked(1);
-    //setStyleSheet("border: 1px solid black;");
 
+    // 播放线程
+    QThread *playThread = new QThread();
+    playbackController->moveToThread(playThread);
+    playThread->start();
+
+    // 初始化
+    connect(playThread, &QThread::started, playbackController, &PlaybackController::initialized, Qt::QueuedConnection);
+
+    // 添加线程清理
+    connect(this, &MainWindow::destroyed, this, [playThread]() {
+        playThread->quit();
+        playThread->wait();
+        playThread->deleteLater();
+    });
+
+    // 网络线程
+    QThread *networkThread = new QThread();
+    networkManager->moveToThread(networkThread);
+    networkThread->start();
+
+    connect(networkThread, &QThread::started, networkManager, &NetworkManager::initialized, Qt::QueuedConnection);
+
+    connect(this, &MainWindow::destroyed, this, [networkThread](){
+        networkThread->quit();
+        networkThread->wait();
+        networkThread->deleteLater();
+    });
 }
 
 void MainWindow::centerWindow()
@@ -113,20 +139,17 @@ void MainWindow::handleReturnedList(QList<MusicTrack>* returnList)
                 return;
             }
 
-//            track.artist = musicListController->getCurrentTrack().artist;
-//            track.title = musicListController->getCurrentTrack().title;
             selectedTrack.downloadPath = track.downloadPath;
             QString savePath = StringConstants::Settings::musicDownloadPath+QString("%1 %2.mp3").arg(selectedTrack.artist).arg(selectedTrack.title);
             qDebug() << savePath;
             selectedTrack.filePath = savePath;
-            networkManager->setSavePath(savePath);
-            networkManager->downloadMusic(selectedTrack.downloadPath);
-            if (QFileInfo(savePath).size() > 0)
-            {
-                infoShow("下载成功");
-
-//                qDebug() << "下载成功";
-            }
+            emit requestDownloadMusic(savePath, selectedTrack.downloadPath);
+//            networkManager->setSavePath(savePath);
+//            networkManager->downloadMusic(selectedTrack.downloadPath);
+//            if (QFileInfo(savePath).size() > 0)
+//            {
+//                infoShow("下载成功");
+//            }
             musicListController->updateLocalList(&selectedTrack);
 
         }
@@ -148,7 +171,8 @@ void MainWindow::iconDeleteClicked()
 void MainWindow::iconDownloadClicked()
 {
     networkCommand = Download;
-    networkManager->downloadMusicInfo(&(musicListController->getCurrentTrack()));
+    emit requestDownloadInfo(musicListController->getCurrentTrack());
+    //networkManager->downloadMusicInfo(&(musicListController->getCurrentTrack()));
 }
 
 void MainWindow::iconFavouriteMusicClicked()
@@ -259,9 +283,9 @@ void MainWindow::iconSearchClicked()
 {
     networkCommand = Search;
     musicListController->clearSearchList();
-    QString text = inputSearch->text();
-    //    qDebug() << text;
-    networkManager->searchMusic(text);
+    QString keyWord = inputSearch->text();
+    emit requestSearchMusic(keyWord);
+    //networkManager->searchMusic(text);
 }
 
 void MainWindow::iconSearchResultClicked()
@@ -286,12 +310,14 @@ void MainWindow::iconStartPauseClicked()
     if (currentPlaybackState==QMediaPlayer::PlayingState)
     {
         // 暂停
-        playbackController->pause();
+        //playbackController->pause();
+        emit requestPause();
     }
     else
     {
         // 播放
-        playbackController->play();
+        //playbackController->play();
+        emit requestPlay();
     }
 
 }
@@ -303,14 +329,17 @@ void MainWindow::iconVolumeClicked()
         isVolume = false;
         playingInfo->volume = 0;
         iconVolume->setIcon(QIcon(StringConstants::UI::silencePath));
-        playbackController->setVolume(0);
+        //playbackController->setVolume(0);
+        emit reqestSetVolume(0);
     }
     else
     {
         isVolume = true;
         playingInfo->volume = (float)0.2;
-        playbackController->setVolume(playingInfo->volume);
+        //playbackController->setVolume(playingInfo->volume);
+
         iconVolume->setIcon(QIcon(StringConstants::UI::volumePath));
+        emit reqestSetVolume(playingInfo->volume);
     }
 }
 
@@ -426,8 +455,9 @@ void MainWindow::playNewTrack(MusicTrack *selectedTrack)
 
     playingInfo->playingTrack = *selectedTrack;
     musicListController->addTrackToList(PlayHistoryListType, &playingInfo->playingTrack);
+    emit requestPlayTrack(playingInfo->playingTrack);
     //playingTrack = *selectedTrack;
-    playbackController->playTrack(&playingInfo->playingTrack);
+    //playbackController->playTrack(&playingInfo->playingTrack);
     //progressSlider->updateDuration(playingInfo->playingTrack.duration);
     updatePlayingTrackInfo();
 }
@@ -465,7 +495,8 @@ void MainWindow::playSelectedTrack(const QModelIndex &index)
         {
             networkCommand = Play;
             playingInfo->playingTrack = selectedTrack;
-            networkManager->playMusicInfo(&selectedTrack);
+            emit requestPlayMusicInfo(selectedTrack);
+            //networkManager->playMusicInfo(selectedTrack);
         }
     }
 }
@@ -690,20 +721,36 @@ void MainWindow::setupConnections()
 //        volumeSlider->show();
 //    });
 
-    connect(progressSlider, &QSlider::sliderMoved, playbackController, &PlaybackController::updateProgress);
+    connect(progressSlider, &QSlider::sliderMoved, playbackController, &PlaybackController::updateProgress, Qt::QueuedConnection);
 
     connect(this, &MainWindow::lyricShow, lyricParser, &LyricParser::lyricTextShow);
     connect(this, &MainWindow::playingTrackChanged, this, &MainWindow::playNewTrack);
     connect(this, &MainWindow::customContextMenuRequested, this, &MainWindow::showContextMenu);
+    connect(this, &MainWindow::requestPlayTrack, playbackController, &PlaybackController::playTrack, Qt::QueuedConnection);
+    connect(this, &MainWindow::requestPlay, playbackController, &PlaybackController::play, Qt::QueuedConnection);
+    connect(this, &MainWindow::requestPause, playbackController, &PlaybackController::pause, Qt::QueuedConnection);
+    connect(this, &MainWindow::requestDownloadMusic, networkManager, [=](QString savePath, QString downloadPath){
+        networkManager->setSavePath(savePath);
+        networkManager->downloadMusic(downloadPath);
+        if (QFileInfo(savePath).size() > 0)
+        {
+            infoShow("下载成功");
+        }
+        }, Qt::QueuedConnection);
+
+    connect(this, &MainWindow::requestDownloadInfo, networkManager, &NetworkManager::downloadMusicInfo, Qt::QueuedConnection);
+    connect(this, &MainWindow::requestSearchMusic, networkManager, &NetworkManager::searchMusic, Qt::QueuedConnection);
+    connect(this, &MainWindow::requestPlayMusicInfo, networkManager, &NetworkManager::playMusicInfo, Qt::QueuedConnection);
 
     connect(musicListController->view(), &QTableView::doubleClicked, this, &MainWindow::playSelectedTrack);
 
-    connect(playbackController, &PlaybackController::sliderPositionChanged, progressSlider, &CustomSlider::updatePlaybackProgess);
-    connect(playbackController, &PlaybackController::musicPlaybackStateChanged, this, &MainWindow::updatePlaybackState);   
-    connect(playbackController, &PlaybackController::musicPlayDurationChanged, progressSlider, &CustomSlider::updateDuration);
-    connect(playbackController, &PlaybackController::statusChanged, this, &MainWindow::updateMediaStatus);
+    connect(playbackController, &PlaybackController::sliderPositionChanged, progressSlider, &CustomSlider::updatePlaybackProgess, Qt::QueuedConnection);
+    connect(playbackController, &PlaybackController::musicPlaybackStateChanged, this, &MainWindow::updatePlaybackState, Qt::QueuedConnection);
+    connect(playbackController, &PlaybackController::musicPlayDurationChanged, progressSlider, &CustomSlider::updateDuration, Qt::QueuedConnection);
+    connect(playbackController, &PlaybackController::statusChanged, this, &MainWindow::updateMediaStatus, Qt::QueuedConnection);
+    connect(playbackController, &PlaybackController::requestWarningMessage, this, [=](QString title, QString text){QMessageBox::warning(0, title, text);}, Qt::QueuedConnection);
 
-    connect(networkManager, &NetworkManager::networkReturned, this, &MainWindow::handleReturnedList);
+    connect(networkManager, &NetworkManager::networkReturned, this, &MainWindow::handleReturnedList, Qt::QueuedConnection);
 
 
 //    connect(networkManager, &NetworkManager::networkReturned, musicListController, [&](QList<MusicTrack> * returnList){
@@ -733,7 +780,7 @@ void MainWindow::setupConnections()
     connect(volumeSlider, &VolumePopup::volumeChanged, this, [=](int value){
         playingInfo->volume = value;
         playbackController->setVolume(playingInfo->volume*0.01);
-    });
+        }, Qt::QueuedConnection);
 
 }
 

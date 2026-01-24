@@ -48,6 +48,7 @@ signals:
     void currentTrackChanged(MusicTrack *track);
     void errorOccurred(const QString &error);
     void durationChanged(qint64 duration);
+    void showWarningMessage(QString title, QString test);
 
 };
 
